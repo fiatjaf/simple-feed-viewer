@@ -1,6 +1,7 @@
 /* global TrelloPowerUp, fetch */
 
 const qs = require('qs')
+const extractSummary = require('extract-summary')
 
 const t = TrelloPowerUp.iframe()
 const url = t.arg('url')
@@ -25,12 +26,12 @@ t.render(() => {
             ${item.image ? `<img src="${item.image}">` : ''}
             <h1><a href="${item.link}" target="_blank" rel="external">${item.title}</a></h1>
             <aside>
-              <time>${(item.updated || item.published || '').replace(' +000', '')}</time>
+              <time>${(item.updated || item.published || '').replace('00:00:000', '').replace(' +000', '')}</time>
               ${item.author ? `<ul><li>${item.author.name}</li></ul>` : ''}
             </aside>
           </header>
           <div>
-            ${item.description || item.content}
+            ${(item.description || item.content || '').length > 650 ? extractSummary(item.description || item.content, 'html') : item.description || item.content || ''}
           </div>
         </article>
       </li>
@@ -72,8 +73,13 @@ link.href = 'https://cdn.rawgit.com/fiatjaf/classless/c891758/themes/zen/theme.c
 document.head.appendChild(link)
 let custom = document.createElement('style')
 custom.innerHTML = `
-body {
+body,
+body > main {
   background: transparent;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  text-align: justify;
 }
 `
 document.head.appendChild(custom)

@@ -48,6 +48,18 @@ func main() {
 				return
 			}
 
+			if len(feed.Items) > 5 {
+				feed.Items = feed.Items[:5]
+			}
+			for i, item := range feed.Items {
+				if len(item.Description) > 700 {
+					feed.Items[i].Description = item.Description[:700]
+				}
+				if len(item.Content) > 700 {
+					feed.Items[i].Content = item.Content[:700]
+				}
+			}
+
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(feed)
 		},
@@ -69,7 +81,7 @@ func main() {
 	)
 	router.Path("/favicon.ico").Methods("GET").HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			http.ServeFile(w, r, "./powerup/icon.png")
+			http.ServeFile(w, r, "./powerup/icon.svg")
 			return
 		})
 
