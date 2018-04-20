@@ -8,37 +8,58 @@ qs.append('url', url)
 
 t.render(() => {
   fetch('/feed?' + qs.toString())
-    .then(r => r.json())
-    .then(feed => {
-      let html = `<main><section>
+    .then(r => {
+      if (r.ok) return r.json().then(feed => `
+<main>
+  <section>
+    <header>
+      <h1>${feed.link ? `<a href="${feed.link}">${feed.title}</a>` : feed.title}</h1>
+    </header>
+    <ul>
+    ${feed.items.map(item => `
+      <li>
+        <article>
+          <header>
+            ${item.image ? `<img src="${item.image}">` : ''}
+            <h1><a href="${item.link}" target="_blank" rel="external">${item.title}</a></h1>
+            <aside>
+              <time>${(item.updated || item.published || '').replace(' +000', '')}</time>
+              ${item.author ? `<ul><li>${item.author.name}</li></ul>` : ''}
+            </aside>
+          </header>
+          <div>
+            ${item.description || item.content}
+          </div>
+        </article>
+      </li>
+    `).join('')}
+    </ul>
+  </section>
+</main>
+      `)
+      else return r.text().then(text => `
 <header>
-  <h1>${feed.link ? `<a href="${feed.link}">${feed.title}</a>` : feed.title}</h1>
+  <h1>There was an error fetching this feed</h1>
+  <p>${text}</p>
 </header>
-<ul>
-${feed.items.map(item => `
-  <li>
-    <article>
-      <header>
-        ${item.image ? `<img src="${item.image}">` : ''}
-        <h1><a href="${item.link}" target="_blank" rel="external">${item.title}</a></h1>
-        <aside>
-          <time>${item.updated || item.published || ''}</time>
-          ${item.author ? `<ul><li>${item.author.name}</li></ul>` : ''}
-        </aside>
-      </header>
-      <div>
-        ${item.description || item.content}
-      </div>
-    </article>
-  </li>
-`).join('')}
-</ul>
-</section></main>`
+      `)
+    })
+    .catch(e => `
+<header>
+  <h1>An error happened</h1>
+  <p>${e.message}</p>
+</header>
+<main>
+  <article>
+    <div style="white-space: pre-wrap; font-family: monospace;">
+${e.stack}
+    </div>
+  </article>
+</main>
+    `)
+    .then(html => {
       document.body.innerHTML = html
       t.sizeTo('html')
-    })
-    .catch(e => {
-      console.log('error getting rss content', e)
     })
 })
 
