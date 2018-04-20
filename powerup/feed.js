@@ -1,15 +1,17 @@
-/* global TrelloPowerUp, URLSearchParams, fetch */
+/* global TrelloPowerUp, fetch */
+
+const qs = require('qs')
 
 const t = TrelloPowerUp.iframe()
 const url = t.arg('url')
 
-let qs = new URLSearchParams()
-qs.append('url', url)
-
 t.render(() => {
-  fetch('/feed?' + qs.toString())
-    .then(r => {
-      if (r.ok) return r.json().then(feed => `
+  fetch('/feed?' + qs.stringify({url}))
+    .then(r => r.ok
+      ? r.json()
+        .then(feed => {
+          t.set('board', 'shared', `${url}:updated`, feed.updatedParsed)
+          return `
 <main>
   <section>
     <header>
@@ -36,14 +38,15 @@ t.render(() => {
     </ul>
   </section>
 </main>
-      `)
-      else return r.text().then(text => `
+        `
+        })
+      : r.text().then(text => `
 <header>
   <h1>There was an error fetching this feed</h1>
   <p>${text}</p>
 </header>
-      `)
-    })
+        `)
+    )
     .catch(e => `
 <header>
   <h1>An error happened</h1>

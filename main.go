@@ -52,6 +52,21 @@ func main() {
 			json.NewEncoder(w).Encode(feed)
 		},
 	)
+	router.Path("/feed/updated").Methods("GET").HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			url := r.URL.Query().Get("url")
+			fp := gofeed.NewParser()
+			feed, err := fp.ParseURL(url)
+			if err != nil {
+				log.Error().Err(err).Str("url", url).Msg("error parsing feed")
+				http.Error(w, err.Error(), 400)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(feed.UpdatedParsed)
+		},
+	)
 	router.Path("/favicon.ico").Methods("GET").HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			http.ServeFile(w, r, "./powerup/icon.png")
@@ -68,10 +83,12 @@ func main() {
 			}
 
 			if r.URL.Path == "/powerup/icon.svg" {
-				color := "#" + r.URL.Query().Get("color")
-				if color == "#" {
-					color = "#999999"
+				front := "#" + r.URL.Query().Get("color")
+				back := "transparent"
+				if front == "#" {
+					front = "#999"
 				}
+
 				w.Header().Set("Content-Type", "image/svg+xml")
 				fmt.Fprintf(w, `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -82,7 +99,7 @@ func main() {
 
   <style type="text/css">
     .button {stroke: none; fill: %s;}
-    .symbol {stroke: none; fill: white;}
+    .symbol {stroke: none; fill: %s;}
   </style>
 
   <rect   class="button" width="8" height="8" rx="1.5" />
@@ -91,7 +108,7 @@ func main() {
   <path   class="symbol" d="m 1,2 a 5,5 0 0 1 5,5 h 1 a 6,6 0 0 0 -6,-6 z" />
 
 </svg>
-                `, color)
+                `, back, front)
 				return
 			}
 
