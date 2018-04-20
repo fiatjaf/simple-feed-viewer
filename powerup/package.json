@@ -1,0 +1,28 @@
+{
+  "main": "main.js",
+  "scripts": {
+    "watch": "find -name \"*.js\" ! -name \"bundle.js\" ! -path \"*node_modules*\" | entr browserifyinc -vd app.js -o bundle.js",
+    "build": "browserify app.js -o bundle.js",
+    "heroku-postbuild": "browserify powerup/app.js -o powerup/bundle.js"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "bubleify",
+        {
+          "transforms": {
+            "dangerousTaggedTemplateString": true
+          },
+          "objectAssign": "xtend",
+          "sourceMap": true
+        }
+      ]
+    ]
+  },
+  "dependencies": {
+    "browserify": "^14.4.0",
+    "browserify-incremental": "^3.1.1",
+    "bubleify": "^0.7.0",
+    "isomorphic-fetch": "*"
+  }
+}
