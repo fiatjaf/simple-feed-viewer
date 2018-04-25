@@ -9,7 +9,11 @@ TrelloPowerUp.initialize({
       .map(att => {
         return {
           claimed: [att],
-          title: att.name,
+          id: t.url,
+          title: () =>
+            fetch('/feed/title?' + qs.stringify({url: att.url}))
+              .then(r => r.text())
+              .catch(() => att.name),
           icon: './icon.svg',
           content: {
             type: 'iframe',

@@ -77,6 +77,20 @@ func main() {
 			json.NewEncoder(w).Encode(feed)
 		},
 	)
+	router.Path("/feed/title").Methods("GET").HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			url := r.URL.Query().Get("url")
+			feed, err := getFeed(url)
+			if err != nil {
+				log.Error().Err(err).Str("url", url).Msg("error parsing feed")
+				http.Error(w, err.Error(), 400)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(feed.Title)
+		},
+	)
 	router.Path("/feed/updated").Methods("GET").HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			url := r.URL.Query().Get("url")
