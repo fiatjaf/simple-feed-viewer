@@ -15,9 +15,6 @@ t.render(() => {
           return `
 <main>
   <section>
-    <header>
-      <h1>${feed.link ? `<a href="${feed.link}">${feed.title}</a>` : feed.title}</h1>
-    </header>
     <ul>
     ${feed.items.map(item => `
       <li>
