@@ -5,7 +5,7 @@ const qs = require('qs')
 TrelloPowerUp.initialize({
   'attachment-sections': function (t, options) {
     return options.entries
-      .filter(match)
+      .filter(matches)
       .map(att => {
         return {
           claimed: [att],
@@ -23,7 +23,7 @@ TrelloPowerUp.initialize({
   'card-badges': function (t) {
     return t.card('attachments')
       .then(({attachments}) => {
-        attachments = attachments.filter(match)
+        attachments = attachments.filter(matches)
 
         return Promise.all([
           Promise.all(
@@ -60,11 +60,11 @@ TrelloPowerUp.initialize({
   }
 })
 
-function match (att) {
+function matches (att) {
   return (
     att.url.match(/\bfeed/) ||
-    att.url.indexOf(/\brss\b/) ||
-    att.url.indexOf(/\batom\b/) ||
-    att.name.indexOf(/\bfeed\b/)
+    att.url.match(/\brss\b/) ||
+    att.url.match(/\batom\b/) ||
+    att.name.match(/\bfeed\b/)
   )
 }
