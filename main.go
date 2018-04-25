@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -12,16 +13,19 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/mmcdole/gofeed"
 	"github.com/rs/zerolog"
+	"gopkg.in/redis.v5"
 	"gopkg.in/tylerb/graceful.v1"
 )
 
 type Settings struct {
-	Host string `envconfig:"HOST" required:"true"`
-	Port string `envconfig:"PORT" required:"true"`
+	Host     string `envconfig:"HOST" required:"true"`
+	Port     string `envconfig:"PORT" required:"true"`
+	RedisURL string `envconfig:"REDIS_URL"`
 }
 
 var err error
 var s Settings
+var rds *redis.Client
 var router *mux.Router
 var schema graphql.Schema
 var log = zerolog.New(os.Stderr).Output(zerolog.ConsoleWriter{Out: os.Stderr})
@@ -34,14 +38,23 @@ func main() {
 
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 
+	// redis client
+	urlp, err := url.Parse(s.RedisURL)
+	if err == nil {
+		passw, _ := urlp.User.Password()
+		rds = redis.NewClient(&redis.Options{
+			Addr:     urlp.Host,
+			Password: passw,
+		})
+	}
+
 	// define routes
 	router = mux.NewRouter()
 
 	router.Path("/feed").Methods("GET").HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			url := r.URL.Query().Get("url")
-			fp := gofeed.NewParser()
-			feed, err := fp.ParseURL(url)
+			feed, err := getFeed(url)
 			if err != nil {
 				log.Error().Err(err).Str("url", url).Msg("error parsing feed")
 				http.Error(w, err.Error(), 400)
@@ -67,8 +80,7 @@ func main() {
 	router.Path("/feed/updated").Methods("GET").HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			url := r.URL.Query().Get("url")
-			fp := gofeed.NewParser()
-			feed, err := fp.ParseURL(url)
+			feed, err := getFeed(url)
 			if err != nil {
 				log.Error().Err(err).Str("url", url).Msg("error parsing feed")
 				http.Error(w, err.Error(), 400)
@@ -131,4 +143,26 @@ func main() {
 	// start the server
 	log.Info().Str("port", os.Getenv("PORT")).Msg("listening.")
 	graceful.Run(":"+os.Getenv("PORT"), 10*time.Second, router)
+}
+
+func getFeed(url string) (feed *gofeed.Feed, err error) {
+	bf, err := rds.Get("feed:" + url).Bytes()
+	if err != nil {
+		goto fallback
+	}
+	err = json.Unmarshal(bf, &feed)
+	if err != nil {
+		goto fallback
+	}
+	return
+
+fallback:
+	fp := gofeed.NewParser()
+	feed, err = fp.ParseURL(url)
+	if err == nil {
+		bf, _ = json.Marshal(feed)
+		rds.Set("feed:"+url, bf, time.Hour*4)
+	}
+
+	return feed, err
 }
