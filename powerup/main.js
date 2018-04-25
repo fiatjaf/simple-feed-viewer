@@ -27,18 +27,19 @@ TrelloPowerUp.initialize({
   'card-badges': function (t) {
     return t.card('attachments')
       .then(({attachments}) => {
-        attachments = attachments.filter(matches)
+        let feeds = attachments.filter(matches)
+        if (feeds.length === 0) return []
 
         return Promise.all([
           Promise.all(
-            attachments
+            feeds
               .map(att =>
                 fetch('/feed/updated?' + qs.stringify({url: att.url}))
                   .then(r => r.json())
               )
           ),
           Promise.all(
-            attachments
+            feeds
               .map(att => t.get('board', 'shared', `${att.url}:updated`, '0000-00-00'))
           )
         ])
