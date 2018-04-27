@@ -64,10 +64,6 @@ ${e.stack}
     })
 })
 
-let link = document.createElement('link')
-link.rel = 'stylesheet'
-link.href = 'https://cdn.rawgit.com/fiatjaf/classless/c891758/themes/zen/theme.css'
-document.head.appendChild(link)
 let custom = document.createElement('style')
 custom.innerHTML = `
 body,
