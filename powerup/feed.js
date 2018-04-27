@@ -11,7 +11,7 @@ t.render(() => {
     .then(r => r.ok
       ? r.json()
         .then(feed => {
-          t.set('board', 'shared', `${url}:updated`, feed.updatedParsed)
+          t.set('member', 'shared', `${url}:viewed`, feed.updatedParsed)
           return `
 <main>
   <section>

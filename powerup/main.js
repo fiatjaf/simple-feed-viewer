@@ -40,7 +40,7 @@ TrelloPowerUp.initialize({
           ),
           Promise.all(
             feeds
-              .map(att => t.get('board', 'shared', `${att.url}:updated`, '0000-00-00'))
+              .map(att => t.get('member', 'shared', `${att.url}:viewed`, '0000-00-00'))
           )
         ])
       })
