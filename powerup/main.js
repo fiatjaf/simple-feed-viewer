@@ -67,9 +67,10 @@ TrelloPowerUp.initialize({
 
 function matches (att) {
   return (
-    att.url.match(/\bfeed/) ||
-    att.url.match(/\brss\b/) ||
-    att.url.match(/\batom\b/) ||
-    att.name.match(/\bfeed\b/)
+    att.url.match(/\bfeed/i) ||
+    att.url.match(/rss\b/i) ||
+    att.url.match(/\batom\b/i) ||
+    att.name.match(/\bfeed\b/i) ||
+    att.name.match(/\bRSS\b/)
   )
 }
