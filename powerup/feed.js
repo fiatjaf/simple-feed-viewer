@@ -63,16 +63,3 @@ ${e.stack}
       t.sizeTo('html')
     })
 })
-
-let custom = document.createElement('style')
-custom.innerHTML = `
-body,
-body > main {
-  background: transparent;
-  overflow: hidden;
-  padding: 0;
-  margin: 0;
-  text-align: justify;
-}
-`
-document.head.appendChild(custom)

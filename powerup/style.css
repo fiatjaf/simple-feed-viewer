@@ -43,3 +43,44 @@ input {
   margin 2px;
   padding-left: 2px;
 }
+
+body,
+body > main {
+  background: transparent;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+main > section > ul {
+  margin: 0;
+  padding: 0;
+}
+  main > section > ul > li {
+    margin-bottom: 23px;
+  }
+    main > section > ul > li article header h1 {
+      font-size: 24px;
+    }
+      main > section > ul > li article header h1 a {
+        text-decoration: none;
+      }
+        main > section > ul > li article header h1 a:hover {
+          text-decoration: underline;
+        }
+    main > section > ul > li article aside {
+      margin-bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+      main > section > ul > li article time {
+        font-weight: bold;
+      }
+      main > section > ul > li article aside ul {
+        padding: 0;
+      }
+    main > section > ul > li article > div {
+      text-align: justify;
+    }
