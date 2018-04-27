@@ -43,20 +43,20 @@ TrelloPowerUp.initialize({
               .map(att => t.get('member', 'shared', `${att.url}:viewed`, '0000-00-00'))
           )
         ])
-      })
-      .then(([current, cached]) => {
-        var isUpdated = 0
-        for (let i = 0; i < current.length; i++) {
-          if (current[i] > cached[i]) {
-            isUpdated += 1
-          }
-        }
+          .then(([current, cached]) => {
+            var isUpdated = 0
+            for (let i = 0; i < current.length; i++) {
+              if (current[i] > cached[i]) {
+                isUpdated += 1
+              }
+            }
 
-        return [{
-          text: `${isUpdated}/${current.length}`,
-          icon: './icon.svg',
-          color: isUpdated ? 'orange' : null
-        }]
+            return [{
+              text: `${isUpdated}/${current.length}`,
+              icon: './icon.svg',
+              color: isUpdated ? 'orange' : null
+            }]
+          })
       })
       .catch(e => {
         console.log(e)
