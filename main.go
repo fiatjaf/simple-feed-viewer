@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -172,6 +173,11 @@ func getFeed(url string) (feed *gofeed.Feed, err error) {
 
 fallback:
 	fp := gofeed.NewParser()
+	fp.Client = &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
 	feed, err = fp.ParseURL(url)
 	if err == nil {
 		bf, _ = json.Marshal(feed)
